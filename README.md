@@ -1,7 +1,7 @@
 # Overview
 Python wrapper for the Database of Religious History (DRH). 
 * Main code in `drhwrapper.py`.
-* Example analysis in `demo_analysis.ipynb` (data for this analysis saved in `buddhist_answer_data.pkl`)
+* Example analysis in `demo_analysis.ipynb`.
 * To test the write API provide your key in `.env` file
 * API documentation: https://staging.religiondatabase.org/public-api/v1/doc/
 
@@ -38,8 +38,4 @@ https://basecamp.com/1771727/projects/11075898/todos/492858628
 
 1. Do we have the level of tags (e.g., "Christian Traditions" is level 2) from the API? Looks like we do not. I am not sure how important this is. We do have "parent", but I think "level" might be helpful as well. 
 
-2. Consider transformations:
-e.g., dates to date-time
-e.g., regions to geopandas
---> perhaps this should be optional arguments?
-
+2. Consider transformations (e.g., dates to date-time, regions to geopandas). Either leave to user or have as optional arguments. 
