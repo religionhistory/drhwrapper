@@ -12,3 +12,4 @@ dependencies:
   - ipykernel
   - tqdm
   - networkx
+  - geopandas
