@@ -8,6 +8,7 @@ from tqdm import tqdm
 import numpy as np
 import time
 import random
+import networkx as nx
 
 
 class DRHWrapper:
@@ -357,6 +358,60 @@ class DRHWrapper:
         ]
         return region_tag_df
 
+    # questionrelation endpoint
+    def get_questionrelations(self, to_dataframe=True, simplify=True):
+        """
+        Fetches questionrelation table.
+        Defaults to returning a DataFrame.
+        Defaults to simplifying output where question_id is primary key and related_question_id is lowest question_id within each connected component.
+        """
+
+        response = requests.get(url=os.path.join(self.base_url, "questionrelation"))
+        questionrelation_json = response.json()
+
+        # If not to_dataframe we just return
+        if not to_dataframe:
+            return questionrelation_json
+
+        # If not simplify we return as is (as DataFrame)
+        questionrelation_df = pd.DataFrame(questionrelation_json)
+        if not simplify:
+            return questionrelation_df.sort_values("id")
+
+        # Else we simplify
+        questionrelation_df = questionrelation_df.drop(columns="id")
+        questionrelation_df = questionrelation_df.rename(
+            columns={
+                "first_question_id": "question_id",
+                "second_question_id": "related_question_id",
+            }
+        )
+
+        # Build graph
+        G = nx.Graph()
+        for _, row in questionrelation_df.iterrows():
+            G.add_edge(row["question_id"], row["related_question_id"])
+
+        # Find connected components
+        connected_components = list(nx.connected_components(G))
+
+        # Create a new DataFrame for the output with the smallest question_id in each component as the related_question_id
+        new_labels = []
+        for component in connected_components:
+            min_question_id = min(
+                component
+            )  # Find the minimum question_id in the current component
+            for question_id in component:
+                new_labels.append(
+                    {"question_id": question_id, "related_question_id": min_question_id}
+                )
+
+        questionrelation_df = pd.DataFrame(new_labels)
+        questionrelation_df = questionrelation_df.sort_values(
+            by=["related_question_id", "question_id"]
+        ).reset_index(drop=True)
+        return questionrelation_df
+
     # find endpoints
     @retry_api_call
     def find_information(self, endpoint, id):
@@ -552,6 +607,7 @@ class DRHWrapper:
                 for answer in answers:
                     answer_id = answer["id"]
                     answer_name = answer["name"]
+                    answer_value = answer["value"]
                     answer_text = answer["text_input"]
                     answer_sub_questions = answer["sub_questions"]
 
@@ -572,6 +628,7 @@ class DRHWrapper:
                         answer_set_region_id,
                         answer_id,
                         answer_name,
+                        answer_value,
                         answer_text,
                         notes,
                     ]
@@ -682,6 +739,7 @@ class DRHWrapper:
                 "answer_set_region_id",
                 "answer_id",
                 "answer_name",
+                "answer_value",
                 "answer_text",
                 "notes",
             ],

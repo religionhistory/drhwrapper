@@ -14,13 +14,9 @@ https://basecamp.com/1771727/projects/11075898/todos/492858628
 
 This can also be seen in `problems_answerset.py`
 
-3. The answerset only provides the answer "name" not the "value". The answer "value" is more reliable and robust so we need this variable from the API side. Navid is working on this, and the problem is documented here:  
-https://basecamp.com/1771727/projects/11075898/todos/492858628
+3. The answerset now includes the answer "value" in addition to the answer "name". The `drhwrapper.py` has been updated. Updated this in `demo_read_api.ipynb` but need to update in `demo_analysis.ipynb` as well. 
 
-This can also be seen in `problems_answerset.py`
-
-4. Get related questions table (new endpoint). Navid is working on this, and the problem is documented here: 
-https://basecamp.com/1771727/projects/11075898/todos/494406554
+4. Related question ID endpoint now added and functionality made to extract in useful format. Documented this in `demo_read_api.ipynb` but should use this in `demo_analysis.ipynb` as well.
 
 5. It should be possible to filter entries (e.g., for `list_entries`) by whether they have been published (as it is for other endpoints such as the region and entry tags). This is a bit tricky to do for entries. Entries that are published have at least 1 value that is not 0 for the `Published` column in the table `public.polls_pollprogress`. Issue is documented here: 
 https://basecamp.com/1771727/projects/11075898/todos/492858628
@@ -31,7 +27,11 @@ https://basecamp.com/1771727/projects/11075898/todos/492858628
 7. Currently the API will give an error if too many answersets are requested. I believe that we cannot easily fix this problem, but I would still like this confirmed. This is documented here: 
 https://basecamp.com/1771727/projects/11075898/todos/492858628
 
-8. Organize the code and the examples such that this can be turned into a Python package that can be installed through pip. I would prefer to fix most of the problems that we currently have before proceeding with this. 
+8. Figure out how we want to handle keys: currently anyone can make read request which can crash our system. We need a system to handle this. Asked Mike on 2024-05-16. 
+
+9. Consider whether write API functionality should be integrated into same base class as the read API or whether to keep these distinct. They will most likely have different users. 
+
+10. Organize the code and the examples such that this can be turned into a Python package that can be installed through pip. I would prefer to fix most of the problems that we currently have before proceeding with this. 
 
 
 # Notes
