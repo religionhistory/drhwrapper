@@ -34,3 +34,7 @@ entry_answers = drh.extract_answer_information(entry_df)  # this fixes it
 entry_answers[
     entry_answers["question_name"].str.contains("Is the cultural contact competitive")
 ]
+
+# another problem (expert for "Expert Source" entries (e.g. 23))
+entry_information = drh.find_entry(23)
+entry_information["expert"]  # not correct
