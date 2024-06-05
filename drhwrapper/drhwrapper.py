@@ -22,17 +22,17 @@ class DRHWrapper:
         base_delay=1,
         max_delay=120,
     ):
-        self.base_url = "https://{}/{}".format(hostname, ver)
-        self._api_key = api_key
-        self.max_retries = max_retries
-        self.base_delay = base_delay
-        self.max_delay = max_delay
         """
         Initializes the API wrapper
         :param hostname: The hostname of the API
         :param api_key: The API key
         :param ver: The version of the API
         """
+        self.base_url = "https://{}/{}".format(hostname, ver)
+        self._api_key = api_key
+        self.max_retries = max_retries
+        self.base_delay = base_delay
+        self.max_delay = max_delay
 
     # not sure whether this should remain but needed given performance issues for now
     def retry_api_call(method):
@@ -590,6 +590,11 @@ class DRHWrapper:
         Helper function for "extract_answer_information". Extracts answers from a dictionary of questions.
         """
         information = []
+        recode_complexity = {
+            0: "Elite",
+            1: "Religious Specialists",
+            2: "Non-elite (common people, general populace)",
+        }
 
         def extract_question_data(question, contextual_data, parent_question_id=None):
             question_id = question["id"]  # question id
@@ -601,6 +606,13 @@ class DRHWrapper:
                 answer_set_year_from = answer_set["year_from"]
                 answer_set_year_to = answer_set["year_to"]
                 answer_set_region_id = answer_set["region_id"]
+                answer_set_expert_id = answer_set["expert_id"]
+                answer_set_status_participants_value = answer_set[
+                    "status_of_participants"
+                ]
+                answer_set_status_participants_name = [
+                    recode_complexity[x] for x in answer_set_status_participants_value
+                ]
                 answers = answer_set["answers"]
                 notes = answer_set["notes"]
 
@@ -626,6 +638,9 @@ class DRHWrapper:
                         answer_set_year_from,
                         answer_set_year_to,
                         answer_set_region_id,
+                        answer_set_expert_id,
+                        answer_set_status_participants_value,
+                        answer_set_status_participants_name,
                         answer_id,
                         answer_name,
                         answer_value,
@@ -737,6 +752,9 @@ class DRHWrapper:
                 "answer_set_year_from",
                 "answer_set_year_to",
                 "answer_set_region_id",
+                "answer_set_expert_id",
+                "answer_set_status_of_participants_value",
+                "answer_set_status_of_participants_name",
                 "answer_id",
                 "answer_name",
                 "answer_value",
@@ -748,4 +766,5 @@ class DRHWrapper:
         # fix introduction of <NA> values
         df["parent_question_id"] = df["parent_question_id"].astype("Int64")
         df["question_group_id"] = df["question_group_id"].astype("Int64")
+
         return df

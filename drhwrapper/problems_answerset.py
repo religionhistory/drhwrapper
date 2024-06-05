@@ -1,11 +1,9 @@
 from drhwrapper import DRHWrapper
 from datetime import datetime
 
-# test
 drh = DRHWrapper("staging.religiondatabase.org/public-api")
 
-# extract entry data ("find_entry" does no preprocessing)
-entry_clean = drh.find_entry(775)
+### problems answerset ###
 
 """
 The two calls below should give distinct sub-questions.
@@ -21,6 +19,7 @@ Note:
 We also have the problem that we are only getting answer "name" and not "value".
 """
 
+entry_clean = drh.find_entry(775)
 entry_clean["categories"][1]["groups"][0]["questions"][0]["answer_sets"][0]["answers"][
     0
 ]["sub_questions"][0]
@@ -38,3 +37,19 @@ entry_answers[
 # another problem (expert for "Expert Source" entries (e.g. 23))
 entry_information = drh.find_entry(23)
 entry_information["expert"]  # not correct
+
+# test new functionality
+entry_df = drh.dataframe_from_entry_id_list([775])
+answerset = drh.extract_answer_information(entry_df)
+answerset[
+    [
+        "answer_set_year_to",
+        "answer_set_region_id",
+        "answer_set_status_of_participants_value",
+        "answer_set_status_of_participants_name",
+        "answer_set_expert_id",
+    ]
+]
+
+# need to consider whether this should be a list or a string
+# also need to check this in cases where we have different values.
