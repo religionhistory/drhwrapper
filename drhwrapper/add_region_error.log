@@ -1,2 +1,0 @@
-ERROR:root:400
-ERROR:root:{"entry_source":["This field is not allowed, should be one of ['personal_expertise', 'secondary_source', 'expert_source', 'supervised_entry']"]}

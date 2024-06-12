@@ -1,5 +1,5 @@
 """
-vmp 2023-05-14:
+vmp 2023-06-12:
 shows that too many requests to the API will result in error.
 """
 

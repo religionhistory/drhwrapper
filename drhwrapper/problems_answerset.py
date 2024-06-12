@@ -19,13 +19,13 @@ Note:
 We also have the problem that we are only getting answer "name" and not "value".
 """
 
-entry_clean = drh.find_entry(775)
-entry_clean["categories"][1]["groups"][0]["questions"][0]["answer_sets"][0]["answers"][
-    0
-]["sub_questions"][0]
-entry_clean["categories"][1]["groups"][0]["questions"][0]["answer_sets"][0]["answers"][
-    0
-]["sub_questions"][1]
+entry_775 = drh.find_entry(775)
+entry_775["categories"][1]["groups"][0]["questions"][0]["answer_sets"][0]["answers"][0][
+    "sub_questions"
+][0]
+entry_775["categories"][1]["groups"][0]["questions"][0]["answer_sets"][0]["answers"][0][
+    "sub_questions"
+][1]
 
 # I have fixed this here now:
 entry_df = drh.dataframe_from_entry_id_list([775])  # still has the issue
