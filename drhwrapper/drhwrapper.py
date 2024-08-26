@@ -34,7 +34,7 @@ class DRHWrapper:
         self.base_delay = base_delay
         self.max_delay = max_delay
 
-    # not sure whether this should remain but needed given performance issues for now
+    # this is currently needed.
     def retry_api_call(method):
         def wrapper_api_call(self, *args, **kwargs):
             base_delay = self.base_delay
@@ -359,7 +359,7 @@ class DRHWrapper:
         return region_tag_df
 
     # questionrelation endpoint
-    def get_questionrelations(self, to_dataframe=True, simplify=True):
+    def get_related_questions(self, to_dataframe=True, simplify=True):
         """
         Fetches questionrelation table.
         Defaults to returning a DataFrame.
@@ -487,7 +487,8 @@ class DRHWrapper:
         return self.dataframe_from_entry_id_list(entry_id_list)
 
     # extract basic entry information
-    def extract_entry_information(self, df_entries):
+    @staticmethod
+    def extract_entry_information(df_entries):
         """
         Helper function to extract basic entry information from a DataFrame of entries.
 
@@ -526,7 +527,8 @@ class DRHWrapper:
         return df_entries
 
     # extract region information
-    def extract_region_information(self, df_entries):
+    @staticmethod
+    def extract_region_information(df_entries):
         """
         Helper function to extract region information from a DataFrame of entries.
 
@@ -556,7 +558,8 @@ class DRHWrapper:
         ]
         return df_entries
 
-    def extract_entry_tags(self, df_entries):
+    @staticmethod
+    def extract_entry_tags(df_entries):
         """
         Helper function to extract entry tags from a DataFrame of entries.
 
@@ -575,6 +578,88 @@ class DRHWrapper:
         ].drop_duplicates()
         return df_entries
 
+    # helper function
+    @staticmethod
+    def extract_answerset(response_json):
+        information = []
+        for json_entry in response_json:
+            entry_id = json_entry["id"]
+            entry_name = json_entry["title"]
+            date_created = json_entry["date_created"]
+            poll_id = json_entry["poll"]["id"]
+            poll_name = json_entry["poll"]["name"]
+            question_id = json_entry["question_id"]
+            for answer in json_entry["answers"]:
+                answer_name = answer["name"]
+                answer_value = answer["value"]
+                # answer_text = answer["text_input"] (always empty)
+                year_from = answer["year_from"]
+                year_to = answer["year_to"]
+                expert_id = answer["expert"]["expert_id"]
+                expert_name = (
+                    answer["expert"]["first_name"] + " " + answer["expert"]["last_name"]
+                )
+                region_id = answer["region_id"]
+                status_participants = answer["status_of_participants"]["name"]
+                information.append(
+                    [
+                        entry_id,
+                        entry_name,
+                        poll_id,
+                        poll_name,
+                        question_id,
+                        answer_name,
+                        answer_value,
+                        # answer_text,
+                        year_from,
+                        year_to,
+                        region_id,
+                        status_participants,
+                        expert_id,
+                        expert_name,
+                        date_created,
+                    ]
+                )
+        df = pd.DataFrame(
+            information,
+            columns=[
+                "entry_id",
+                "entry_name",
+                "poll_id",
+                "poll_name",
+                "question_id",
+                "answer_name",
+                "answer_value",
+                # "answer_text",
+                "year_from",
+                "year_to",
+                "region_id",
+                "status_participants",
+                "expert_id",
+                "expert_name",
+                "date_created",
+            ],
+        )
+        return df
+
+    @retry_api_call
+    def get_answerset(self, question_name: str, to_dataframe=True):
+        """
+        Get answerset for a specific question name. Defaults to returning a DataFrame.
+        """
+        response = requests.get(
+            url=os.path.join(self.base_url, "entries-by-question"),
+            params={"question_name": question_name},
+        )
+        answerset_json = response.json()
+
+        if to_dataframe:
+            answerset_df = self.extract_answerset(answerset_json)
+            return answerset_df
+
+        return answerset_df
+
+    # check whether below is all related to the endpoint that does not work #
     # more advanced utility
     @staticmethod
     def extract_answers(

@@ -15,6 +15,104 @@ endpoint = "entries-by-question"
 response = requests.get(url=os.path.join(base_url, endpoint), params=params)
 response_json = response.json()
 
+## seems unstable (error codes) ##
+# error 500
+# error 500
+# response 200
+# error 502
+# response 200
+
+# need something that actually builds this document;
+response_df = pd.DataFrame(response_json)
+
+# gather all of the information into a dataframe
+information = []
+for json_entry in response_json:
+    entry_id = json_entry["id"]
+    entry_name = json_entry["title"]
+    date_created = json_entry["date_created"]
+    poll_id = json_entry["poll"]["id"]
+    poll_name = json_entry["poll"]["name"]
+    for answer in json_entry["answers"]:
+        answer_name = answer["name"]
+        answer_value = answer["value"]
+        answer_text = answer["text_input"]
+        year_from = answer["year_from"]
+        year_to = answer["year_to"]
+        expert_id = answer["expert"]["expert_id"]
+        expert_name = (
+            answer["expert"]["first_name"] + " " + answer["expert"]["last_name"]
+        )
+        region_id = answer["region_id"]
+        status_participants = answer["status_of_participants"]["name"]
+        information.append(
+            [
+                entry_id,
+                entry_name,
+                date_created,
+                poll_id,
+                poll_name,
+                answer_name,
+                answer_value,
+                answer_text,
+                year_from,
+                year_to,
+                expert_id,
+                expert_name,
+                region_id,
+                status_participants,
+            ]
+        )
+df = pd.DataFrame(
+    information,
+    columns=[
+        "entry_id",
+        "entry_name",
+        "date_created",
+        "poll_id",
+        "poll_name",
+        "answer_name",
+        "answer_value",
+        "answer_text",
+        "year_from",
+        "year_to",
+        "expert_id",
+        "expert_name",
+        "region_id",
+        "status_participants",
+    ],
+)
+
+# so now we do have some cases with multiple answers
+# look into these cases
+# also compare with the data dump potentially
+len(df)
+df["entry_id"].nunique()
+duplication = (
+    df.groupby("entry_id")
+    .size()
+    .reset_index(name="count")
+    .sort_values("count", ascending=False)
+)
+duplication = duplication[duplication["count"] > 1]
+duplication
+df[df["entry_id"] == 929]  # good
+
+""" tested 
+176 (good) -- but all yes
+342 (good) -- but all yes 
+1381 (staging)
+570 -- maybe good -- both yes but 2 different experts (one should be history maybe?)
+416 (good) -- yes and don't know
+929 ()
+"""
+
+"""
+Check how this works with a sub-question;
+can we actually infer what we need in that case? 
+Also try to build up a workflow analysis for this. 
+"""
+
 
 # convert to dataframe
 def convert_dataframe(response_json):
@@ -22,11 +120,12 @@ def convert_dataframe(response_json):
     df = df.rename(
         columns={
             "id": "entry_id",
-            "name": "entry_name",
+            "title": "entry_name",
             "region": "region_id",
-            "poll": "poll_id",
         }
     )
+    df["poll_id"] = df["poll"].apply(lambda x: x["id"])
+    df["poll_name"] = df["poll"].apply(lambda x: x["name"])
     df["answer_name"] = df["answers"].apply(
         lambda x: x[0]["name"] if len(x) > 0 else None
     )
@@ -36,7 +135,75 @@ def convert_dataframe(response_json):
     return df
 
 
+# maybe we do have to loop over records:
+def extract_dataframe(response_json):
+    information = []
+    for json_entry in response_json:
+        entry_id = json_entry["id"]
+        entry_name = json_entry["title"]
+        date_created = json_entry["date_created"]
+        poll_id = json_entry["poll"]["id"]
+        poll_name = json_entry["poll"]["name"]
+        question_id = json_entry["question_id"]
+        for answer in json_entry["answers"]:
+            answer_name = answer["name"]
+            answer_value = answer["value"]
+            answer_text = answer["text_input"]
+            year_from = answer["year_from"]
+            year_to = answer["year_to"]
+            expert_id = answer["expert"]["expert_id"]
+            expert_name = (
+                answer["expert"]["first_name"] + " " + answer["expert"]["last_name"]
+            )
+            region_id = answer["region_id"]
+            status_participants = answer["status_of_participants"]["name"]
+            information.append(
+                [
+                    entry_id,
+                    entry_name,
+                    poll_id,
+                    poll_name,
+                    question_id,
+                    answer_name,
+                    answer_value,
+                    answer_text,
+                    year_from,
+                    year_to,
+                    region_id,
+                    status_participants,
+                    expert_id,
+                    expert_name,
+                    date_created,
+                ]
+            )
+    df = pd.DataFrame(
+        information,
+        columns=[
+            "entry_id",
+            "entry_name",
+            "poll_id",
+            "poll_name",
+            "question_id",
+            "answer_name",
+            "answer_value",
+            "answer_text",
+            "year_from",
+            "year_to",
+            "region_id",
+            "status_participants",
+            "expert_id",
+            "expert_name",
+            "date_created",
+        ],
+    )
+    return df
+
+
+df2 = extract_dataframe(response_json)
+df2
+
 df = convert_dataframe(response_json)
+df["answers"][0]
 
 # how many do we have here?
 len(df)  # 1100 (so has to be more than just groups)
