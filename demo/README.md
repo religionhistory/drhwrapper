@@ -1,3 +1,14 @@
 # Demos
 
-The best way to get started with the `drhwrapper` is to see `demo_analysis.ipynb` and `demo_methods.ipynb`. The first walks users through an example analysis of the relationship between external violent conflict and scarification practices. The second walks users through all available endpoints provided in this package. 
+To run `demo_analysis.ipynb` additionally install `matplotlib`, `seaborn`, `scipy`, `geopandas`, and `shapely` into the environment that has `drhwrapper` installed.
+
+```bash
+# if you are using a venv 
+source env/bin/activate
+
+# install the packages
+pip install matplotlib seaborn scipy geopandas shapely
+```
+
+* `demo_analysis.ipynb` is a simple analysis to showcase core functionality.
+* `demo_methods.ipynb` explains all methods in the DRHWrapper class.  
