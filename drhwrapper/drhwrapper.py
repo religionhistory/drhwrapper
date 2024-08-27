@@ -66,8 +66,15 @@ class DRHWrapper:
 
     # utility for list endpoints
     @staticmethod
-    def to_comma_separated_string(value):
-        """Converts a single value or a list of values into a comma-separated string."""
+    def to_comma_separated_string(value: Union[int, str, List[int]]) -> str:
+        """Converts a single value or a list of values into a comma-separated string.
+
+        Args:
+            value (Union[int, str, List[int]]): values to convert.
+
+        Returns:
+            str: comma-separated string.
+        """
         if isinstance(value, list):
             # Convert each element to string and join with commas
             return ",".join(map(str, value))
@@ -76,8 +83,18 @@ class DRHWrapper:
 
     # utility for list endpoints
     @staticmethod
-    def format_date(date_value):
-        """Formats a date value to the required 'YYYY-MM-DDTHH:MM:SS' format."""
+    def format_date(date_value) -> str:
+        """Format date to 'YYYY-MM-DDTHH:MM:SS'.
+
+        Args:
+            date_value (datetime, str): date to format.
+
+        Raises:
+            ValueError: raise error if date is not in 'YYYY-MM-DD' or 'YYYY-MM-DDTHH:MM:SS' format.
+
+        Returns:
+            str: formatted date as string.
+        """
         expected_format = "%Y-%m-%dT%H:%M:%S"
         if isinstance(date_value, datetime):
             return date_value.strftime(expected_format)
@@ -101,23 +118,26 @@ class DRHWrapper:
 
     # list endpoints
     @retry_api_call
-    def list_information(self, endpoint, available_params, **kwargs):
-        """
-        General method to fetch information, configured by available_params.
+    def list_information(self, endpoint: str, available_params: list, **kwargs) -> dict:
+        """General method to fetch information, configurable with parameters.
 
-        :param endpoint: <str> Specific API endpoint.
-        :param available_params: <list> Specifies which parameters are available for this endpoint.
-        :param **kwargs: Optional keyword arguments, whose acceptability and format depend on available_params, including:
-            - expert: <list[int] | str> A list of expert IDs or a comma-separated string of expert IDs.
-            - poll: <list[int] | str> A list of poll IDs or a comma-separated string of poll IDs.
-            - region: <list[int] | str> A list of region IDs or a comma-separated string of region IDs.
-            - start_date: <datetime.datetime | str> Dates can be provided as datetime objects or strings. If strings,
-                      they should be in 'YYYY-MM-DD' or 'YYYY-MM-DDTHH:MM:SS' format.
-            - end_date: <datetime.datetime | str> Dates can be proided as datetime objects or strings. If strings,
+        Args:
+            endpoint (str): API endpoint to fetch information from.
+            available_params (list): Specific parameters available for the endpoint.
+            **kwargs: Additional parameters to filter the information.
+                - expert: <list[int] | str> A list of expert IDs or a comma-separated string of expert IDs.
+                - poll: <list[int] | str> A list of poll IDs or a comma-separated string of poll IDs.
+                - region: <list[int] | str> A list of region IDs or a comma-separated string of region IDs.
+                - start_date: <datetime.datetime | str> Dates can be provided as datetime objects or strings. If strings,
                         they should be in 'YYYY-MM-DD' or 'YYYY-MM-DDTHH:MM:SS' format.
-            - limit: <int> Number of results to return (default 25).
-            - offset: <int> Initial index from which to return.
-            - ordering: <str> Field to order by.
+                - end_date: <datetime.datetime | str> Dates can be proided as datetime objects or strings. If strings,
+                            they should be in 'YYYY-MM-DD' or 'YYYY-MM-DDTHH:MM:SS' format.
+                - limit: <int> Number of results to return (default 25).
+                - offset: <int> Initial index from which to return.
+                - ordering: <str> Field to order by.
+
+        Returns:
+            dict: Dictionary containing the API response.
         """
 
         params = {"limit": 25}  # Default parameters
@@ -137,13 +157,17 @@ class DRHWrapper:
         return response.json()
 
     def list_entries(self, to_dataframe=True, **kwargs):
-        """
-        Fetches entries.  This method supports all the general parameters detailed in `list_information`
-        and includes the following additional parameters:
+        """Fetches entries. This method supports parameters detailed in `list_information`.
+        Includes additional parameters:
+        - expert: <list[int] | str> A list of expert IDs or a comma-separated string of expert IDs.
+        - region: <list[int] | str> A list of region IDs or a comma-separated string of region IDs.
+        - poll: <list[int] | str> A list of poll IDs or a comma-separated string of poll IDs.
 
-        :param expert: <list[int] | str> A list of expert IDs or a comma-separated string of expert IDs.
-        :pram poll: <list[int] | str> A list of poll IDs or a comma-separated string of poll IDs.
-        :param region: <list[int] | str> A list of region IDs or a comma-separated string of region IDs.
+        Args:
+            to_dataframe (bool, optional): Return as pandas dataframe. Defaults to True.
+
+        Returns:
+            pd.DataFrame: Dataframe with entries.
         """
         available_params = [
             "expert",
@@ -161,7 +185,15 @@ class DRHWrapper:
         return entry_information
 
     @staticmethod
-    def list_entries_to_dataframe(entry_dictionary):
+    def list_entries_to_dataframe(entry_dictionary: dict) -> pd.DataFrame:
+        """Converts entry dictionary to a DataFrame.
+
+        Args:
+            entry_dictionary (dict): Dictionary obtained from .list_entries() method.
+
+        Returns:
+            pd.DataFrame: Pandas dataframe with entries.
+        """
         entry_dictionary_results = entry_dictionary["results"]
         entry_df = pd.DataFrame(entry_dictionary_results)
         entry_df["entry_id"] = entry_df["id"]
@@ -193,12 +225,16 @@ class DRHWrapper:
         return entry_df
 
     def list_entry_tags(self, to_dataframe=True, **kwargs):
-        """
-        Fetches entry tags. This method supports all the general parameters detailed in `list_information`
-        and includes the following additional parameters:
+        """Fetches entry tags. Supports parameters detailed in `list_information`.
+        Includes additional parameters:
+        - approved: <bool> Whether to fetch only approved tags.
+        - created_by: <list[int] | str> A list of user IDs or a comma-separated string of user IDs.
 
-        :param approved: <bool> If True fetch only approved tags, if False fetch only unapproved tags, if not specified fetch all tags.
-        :param created_by: <list[int] | str> A list of user IDs or a comma-separated string of user IDs.
+        Args:
+            to_dataframe (bool, optional): Return as pandas dataframe. Defaults to True.
+
+        Returns:
+            pd.DataFrame: Dataframe with entry tags.
         """
         available_params = [
             "approved",
@@ -215,10 +251,14 @@ class DRHWrapper:
         return entry_tags
 
     @staticmethod
-    def list_entry_tags_to_dataframe(entry_tag_dictionary):
-        """
-        Convenience function to convert entry tag dictionary to a DataFrame.
-        Takes the dictionary from the API and converts it to a DataFrame.
+    def list_entry_tags_to_dataframe(entry_tag_dictionary: dict) -> pd.DataFrame:
+        """Converts entry tag dictionary to a DataFrame.
+
+        Args:
+            entry_tag_dictionary (dict): dictionary obtained from .list_entry_tags() method.
+
+        Returns:
+            pd.DataFrame: Dataframe with entry tags.
         """
         entry_tag_dictionary_results = entry_tag_dictionary["results"]
         entry_tag_df = pd.DataFrame(entry_tag_dictionary_results)
@@ -250,10 +290,14 @@ class DRHWrapper:
         ]
         return entry_tag_df
 
-    def list_regions(self, to_dataframe=True, **kwargs) -> List[Dict]:
-        """
-        Fetches regions from the API.
-        See `list_information` for general parameters.
+    def list_regions(self, to_dataframe=True, **kwargs):
+        """Fetches regions from the API. Supports parameters detailed in `list_information`.
+
+        Args:
+            to_dataframe (bool, optional): Return as pandas dataframe. Defaults to True.
+
+        Returns:
+            pd.DataFrame: Dataframe with regions.
         """
         available_params = [
             "created_by",
@@ -271,10 +315,14 @@ class DRHWrapper:
         return region_information
 
     @staticmethod
-    def list_regions_to_dataframe(region_dictionary):
-        """
-        Convenience function to convert region dictionary to a DataFrame.
-        Takes the dictionary from the API and converts it to a DataFrame.
+    def list_regions_to_dataframe(region_dictionary: dict) -> pd.DataFrame:
+        """Converts region dictionary to a DataFrame.
+
+        Args:
+            region_dictionary (dict): dictionary obtained from .list_regions() method.
+
+        Returns:
+            pd.DataFrame: Dataframe with regions.
         """
         region_dictionary_results = region_dictionary["results"]
         region_df = pd.DataFrame(region_dictionary_results)
@@ -299,14 +347,19 @@ class DRHWrapper:
         ]
         return region_df
 
-    def list_region_tags(self, to_dataframe=True, **kwargs) -> List[Dict]:
-        """
-        Fetches region tags from the API. This method supports all the general parameters detailed in `list_information`
-        and includes the following additional parameters:
+    def list_region_tags(self, to_dataframe=True, **kwargs):
+        """Fetches region tags from the API. Supports parameters detailed in `list_information`.
+        Includes additional parameters:
+        - approved: <bool> Whether to fetch only approved tags.
+        - created_by: <list[int] | str> A list of user IDs or a comma-separated string of user IDs.
 
-        :param approved: <bool | str> If True fetch only approved tags, if False fetch only unapproved tags, if not specified fetch all tags.
-        :param created_by: <list[int] | str> A list of user IDs or a comma-separated string of user IDs.
+        Args:
+            to_dataframe (bool, optional): Return as pandas dataframe. Defaults to True.
+
+        Returns:
+            pd.DataFrame: Dataframe with region tags.
         """
+
         available_params = [
             "approved",
             "created_by",
@@ -323,10 +376,14 @@ class DRHWrapper:
         return region_tags
 
     @staticmethod
-    def list_region_tags_to_dataframe(region_tag_dictionary):
-        """
-        Convenience function to convert region tag dictionary to a DataFrame.
-        Takes the dictionary from the API and converts it to a DataFrame.
+    def list_region_tags_to_dataframe(region_tag_dictionary: dict) -> pd.DataFrame:
+        """Converts region tag dictionary to a DataFrame.
+
+        Args:
+            region_tag_dictionary (dict): dictionary obtained from .list_region_tags() method.
+
+        Returns:
+            pd.DataFrame: Dataframe with region tags.
         """
         region_tag_dictionary_results = region_tag_dictionary["results"]
         region_tag_df = pd.DataFrame(region_tag_dictionary_results)
@@ -360,10 +417,17 @@ class DRHWrapper:
 
     # questionrelation endpoint
     def get_related_questions(self, to_dataframe=True, simplify=True):
-        """
-        Fetches questionrelation table.
-        Defaults to returning a DataFrame.
-        Defaults to simplifying output where question_id is primary key and related_question_id is lowest question_id within each connected component.
+        """Get related questions from the API.
+
+        Args:
+            to_dataframe (bool, optional): Return as pandas dataframe. Defaults to True.
+            simplify (bool, optional):
+                All groups of related questions share a common related question ID.
+                This is the lowest Question ID within group.
+                Defaults to True.
+
+        Returns:
+            pd.DataFrame: Dataframe with question ID (primary key) and related question ID.
         """
 
         response = requests.get(url=os.path.join(self.base_url, "questionrelation"))
@@ -414,50 +478,162 @@ class DRHWrapper:
 
     # find endpoints
     @retry_api_call
-    def find_information(self, endpoint, id):
-        """
-        Fetches a single piece of information from the API.
+    def find_information(self, endpoint: str, id: Union[int, str]) -> Dict:
+        """Fetches a single piece of information from the API.
 
-        :param endpoint: <str> Specific API endpoint.
-        :param id: Union[int, str] ID of the information to fetch.
-        :return: Dictionary containing the API response.
+        Args:
+            endpoint (str): Specific API endpoint to fetch information from.
+            id (Union[int, str]): ID of the information to fetch
+
+        Returns:
+            Dict: Dictionary containing the API response.
         """
         response = requests.get(url=os.path.join(self.base_url, endpoint, str(id)))
         return response.json()
 
     def find_entry(self, entry_id: Union[int, str]) -> Dict:
-        """
-        Fetches a single entry from the API.
+        """Fetches a single entry from the API.
 
-        :param entry_id: Union[int, str] the ID of the entry to fetch.
-        :return: Dictionary containing the API response.
+        Args:
+            entry_id (Union[int, str]): The ID of the entry to fetch.
+
+        Returns:
+            Dict: Dictionary containing the API response.
         """
         return self.find_information("entries", entry_id)
 
     def find_entry_tag(self, entry_tag_id: Union[int, str]) -> Dict:
-        """
-        Fetches a single entry tag from the API.
-        :param entry_tag_id: Union[int, str] The ID of the entry tag to fetch
+        """Fetches a single entry tag from the API.
+
+        Args:
+            entry_tag_id (Union[int, str]): The ID of the entry tag to fetch.
+
+        Returns:
+            Dict: Dictionary containing the API response.
         """
         return self.find_information("entry_tags", entry_tag_id)
 
     def find_region(self, region_id: Union[int, str]) -> Dict:
-        """
-        Fetches a single region from the API
-        :param region_id: Union[int, str] The ID of the region to fetch
+        """Fetches a single region from the API.
+
+        Args:
+            region_id (Union[int, str]): The ID of the region to fetch.
+
+        Returns:
+            Dict: Dictionary containing the API response.
         """
         return self.find_information("regions", region_id)
 
     def find_region_tag(self, region_tag_id: Union[int, str]) -> Dict:
-        """
-        Fetches a single region tag from the API
-        :param region_tag_id: Union[int, str] The ID of the region tag to fetch
+        """Fetches a single region tag from the API.
+
+        Args:
+            region_tag_id (Union[int, str]): The ID of the region tag to fetch.
+
+        Returns:
+            Dict: Dictionary containing the API response.
         """
         return self.find_information("region_tags", region_tag_id)
 
-    # utility
-    def dataframe_from_entry_id_list(self, entry_id_list):
+    @staticmethod
+    def extract_answerset(response_json: dict) -> pd.DataFrame:
+        """Extract answerset from a JSON response from the .get_answerset() method.
+
+        Args:
+            response_json (dict): API response from the .get_answerset() method.
+
+        Returns:
+            pd.DataFrame: Dataframe with answerset information.
+        """
+        information = []
+        for json_entry in response_json:
+            entry_id = json_entry["id"]
+            entry_name = json_entry["title"]
+            date_created = json_entry["date_created"]
+            poll_id = json_entry["poll"]["id"]
+            poll_name = json_entry["poll"]["name"]
+            question_id = json_entry["question_id"]
+            for answer in json_entry["answers"]:
+                answer_name = answer["name"]
+                answer_value = answer["value"]
+                year_from = answer["year_from"]
+                year_to = answer["year_to"]
+                expert_id = answer["expert"]["expert_id"]
+                expert_name = (
+                    answer["expert"]["first_name"] + " " + answer["expert"]["last_name"]
+                )
+                region_id = answer["region_id"]
+                status_participants = answer["status_of_participants"]["name"]
+                information.append(
+                    [
+                        entry_id,
+                        entry_name,
+                        poll_id,
+                        poll_name,
+                        question_id,
+                        answer_name,
+                        answer_value,
+                        year_from,
+                        year_to,
+                        region_id,
+                        status_participants,
+                        expert_id,
+                        expert_name,
+                        date_created,
+                    ]
+                )
+        df = pd.DataFrame(
+            information,
+            columns=[
+                "entry_id",
+                "entry_name",
+                "poll_id",
+                "poll_name",
+                "question_id",
+                "answer_name",
+                "answer_value",
+                "year_from",
+                "year_to",
+                "region_id",
+                "status_participants",
+                "expert_id",
+                "expert_name",
+                "date_created",
+            ],
+        )
+        return df
+
+    @retry_api_call
+    def get_answerset(
+        self, question_name: str, to_dataframe=True
+    ) -> Union[pd.DataFrame, dict]:
+        """Extract answerset for a specific question from the API.
+
+        Args:
+            question_name (str): name of the question to fetch answerset for.
+            to_dataframe (bool, optional): Return as dataframe. Defaults to True.
+
+        Returns:
+            Union[pd.DataFrame, dict]: Return as dataframe (if to_dataframe=True) or dictionary.
+        """
+
+        response = requests.get(
+            url=os.path.join(self.base_url, "entries-by-question"),
+            params={"question_name": question_name},
+        )
+        answerset_json = response.json()
+
+        if to_dataframe:
+            answerset_df = self.extract_answerset(answerset_json)
+            return answerset_df
+
+        return answerset_df
+
+    # bmethods below are related to the endpoint (find_entry) that does not scale well #
+    def dataframe_from_entry_id_list(self, entry_id_list: list) -> pd.DataFrame:
         """Fetches entries from a list of entry IDs and returns them as a DataFrame.
+        Unfortunately, the .find_entry() method does not work well for many entries.
+        Consider using the .get_answerset() method instead.
 
         Args:
             entry_id_list (list): list of integer (entry IDs)
@@ -467,7 +643,7 @@ class DRHWrapper:
         """
         entry_list = []
         for entry_id in tqdm(entry_id_list):
-            entry = self.find_entry(entry_id)
+            entry = self.find_entry(entry_id)  # bottleneck
             entry_list.append(entry)
         df = pd.DataFrame(entry_list)
 
@@ -476,29 +652,18 @@ class DRHWrapper:
         df["entry_name"] = df["entry_name"].apply(lambda x: x["name"])
         return df
 
-    def dataframe_from_entry_list_search(self, **kwargs):
-        """Fetches entries from a search and returns them as a DataFrame.
-
-        Returns:
-            pd.DataFrame: Dataframe with entries from search.
-        """
-        listed_entries = self.list_entries(to_dataframe=False, **kwargs)
-        entry_id_list = [entry["id"] for entry in listed_entries["results"]]
-        return self.dataframe_from_entry_id_list(entry_id_list)
-
-    # extract basic entry information
     @staticmethod
-    def extract_entry_information(df_entries):
+    def extract_entry_information(df_entries: pd.DataFrame) -> pd.DataFrame:
         """
-        Helper function to extract basic entry information from a DataFrame of entries.
+        Function to extract basic entry information from a DataFrame of entries.
+        Dataframe of entries with answersets should be obtained from the .find_entry() method or the .dataframe_from_entry_id_list() method.
 
         Args:
-            df_entries (pd.DataFrame): DataFrame of entries.
+            df_entries (pd.DataFrame): DataFrame of entries with answersets.
 
         Returns:
             pd.DataFrame: DataFrame of basic entry (metadata) information.
         """
-        # df_entries["entry_name"] = df_entries["name"].apply(lambda x: x["name"])
         df_entries["region_id"] = df_entries["region"].apply(lambda x: x["id"])
         df_entries["region_name"] = df_entries["region"].apply(lambda x: x["name"])
         df_entries["expert_id"] = df_entries["expert"].apply(lambda x: x["id"])
@@ -507,7 +672,6 @@ class DRHWrapper:
         )
         df_entries["poll_id"] = df_entries["poll"].apply(lambda x: x["id"])
         df_entries["poll_name"] = df_entries["poll"].apply(lambda x: x["name"])
-        # df_entries = df_entries.rename(columns={"id": "entry_id"})
         df_entries = df_entries[
             [
                 "entry_id",
@@ -528,15 +692,15 @@ class DRHWrapper:
 
     # extract region information
     @staticmethod
-    def extract_region_information(df_entries):
-        """
-        Helper function to extract region information from a DataFrame of entries.
+    def extract_region_information(df_entries: pd.DataFrame) -> pd.DataFrame:
+        """Function to extract region information from a DataFrame of entries.
+        Dataframe of entries with answersets should be obtained from the .find_entry() method or the .dataframe_from_entry_id_list() method.
 
         Args:
-            df_entries (pd.DataFrame): DataFrame of entries.
+            df_entries (pd.DataFrame): DataFrame of entries with answersets.
 
         Returns:
-            pd.DataFrame: DataFrame of region information.
+            pd.DataFrame: Dataframe of region information for entries.
         """
         df_entries["region_id"] = df_entries["region"].apply(lambda x: x["id"])
         df_entries["region_name"] = df_entries["region"].apply(lambda x: x["name"])
@@ -559,15 +723,15 @@ class DRHWrapper:
         return df_entries
 
     @staticmethod
-    def extract_entry_tags(df_entries):
-        """
-        Helper function to extract entry tags from a DataFrame of entries.
+    def extract_entry_tags(df_entries: pd.DataFrame) -> pd.DataFrame:
+        """Function to extract entry tags from a DataFrame of entries.
+        Dataframe of entries with answersets should be obtained from the .find_entry() method or the .dataframe_from_entry_id_list() method.
 
         Args:
-            df_entries (pd.DataFrame): DataFrame of entries.
+            df_entries (pd.DataFrame): Dataframe of entries with answersets.
 
         Returns:
-            pd.DataFrame: DataFrame of entry tags.
+            pd.DataFrame: Dataframe of entry tags for entries.
         """
         df_entries = df_entries.explode("tags")
         df_entries[["entry_tag_id", "entry_tag_name"]] = df_entries["tags"].apply(
@@ -578,89 +742,92 @@ class DRHWrapper:
         ].drop_duplicates()
         return df_entries
 
-    # helper function
-    @staticmethod
-    def extract_answerset(response_json):
+    def extract_answer_information(self, df_entries: pd.DataFrame) -> pd.DataFrame:
+        """Extract answer information from a DataFrame of entries.
+        Dataframe of entries with answersets should be obtained from the .find_entry() method or the .dataframe_from_entry_id_list() method.
+
+        Args:
+            df_entries (pd.DataFrame): Dataframe of entries with answersets.
+
+        Returns:
+            pd.DataFrame: Dataframe of answers for entries.
+        """
         information = []
-        for json_entry in response_json:
-            entry_id = json_entry["id"]
-            entry_name = json_entry["title"]
-            date_created = json_entry["date_created"]
-            poll_id = json_entry["poll"]["id"]
-            poll_name = json_entry["poll"]["name"]
-            question_id = json_entry["question_id"]
-            for answer in json_entry["answers"]:
-                answer_name = answer["name"]
-                answer_value = answer["value"]
-                # answer_text = answer["text_input"] (always empty)
-                year_from = answer["year_from"]
-                year_to = answer["year_to"]
-                expert_id = answer["expert"]["expert_id"]
-                expert_name = (
-                    answer["expert"]["first_name"] + " " + answer["expert"]["last_name"]
-                )
-                region_id = answer["region_id"]
-                status_participants = answer["status_of_participants"]["name"]
-                information.append(
-                    [
+        # loop over entries (rows)
+        for _, row in df_entries.iterrows():
+            entry_id = row["entry_id"]
+            entry_name = row["entry_name"]
+            question_sets = row["categories"]
+            # loop over question sets
+            for question_set in question_sets:
+                question_set_id = question_set["id"]  # overall category
+                question_set_name = question_set["name"]  # overall category name
+                questions = question_set["questions"]
+                if questions:
+                    answers = self.extract_answers(
+                        questions,
                         entry_id,
                         entry_name,
-                        poll_id,
-                        poll_name,
-                        question_id,
-                        answer_name,
-                        answer_value,
-                        # answer_text,
-                        year_from,
-                        year_to,
-                        region_id,
-                        status_participants,
-                        expert_id,
-                        expert_name,
-                        date_created,
-                    ]
-                )
+                        question_set_id,
+                        question_set_name,
+                        question_group_id=np.nan,
+                        question_group_name=np.nan,
+                    )
+                    information.append(answers)
+                else:
+                    questions_groups = question_set["groups"]
+                    for questions_group in questions_groups:
+                        questions_group_i = questions_group["questions"]
+                        question_group_id = questions_group["id"]
+                        question_group_name = questions_group["name"]
+                        answers = self.extract_answers(
+                            questions_group_i,
+                            entry_id,
+                            entry_name,
+                            question_set_id,
+                            question_set_name,
+                            question_group_id=question_group_id,
+                            question_group_name=question_group_name,
+                        )
+                        information.append(answers)
+
+        # flatten list
+        information = [item for sublist in information for item in sublist]
+
+        # gather dataframe
         df = pd.DataFrame(
             information,
             columns=[
                 "entry_id",
                 "entry_name",
-                "poll_id",
-                "poll_name",
+                "question_set_id",
+                "question_set_name",
+                "question_group_id",
+                "question_group_name",
                 "question_id",
+                "question_name",
+                "parent_question_id",
+                "answer_set_id",
+                "answer_set_year_from",
+                "answer_set_year_to",
+                "answer_set_region_id",
+                "answer_set_expert_id",
+                "answer_set_status_of_participants_value",
+                "answer_set_status_of_participants_name",
+                "answer_id",
                 "answer_name",
                 "answer_value",
-                # "answer_text",
-                "year_from",
-                "year_to",
-                "region_id",
-                "status_participants",
-                "expert_id",
-                "expert_name",
-                "date_created",
+                "answer_text",
+                "notes",
             ],
         )
+
+        # fix introduction of <NA> values
+        df["parent_question_id"] = df["parent_question_id"].astype("Int64")
+        df["question_group_id"] = df["question_group_id"].astype("Int64")
+
         return df
 
-    @retry_api_call
-    def get_answerset(self, question_name: str, to_dataframe=True):
-        """
-        Get answerset for a specific question name. Defaults to returning a DataFrame.
-        """
-        response = requests.get(
-            url=os.path.join(self.base_url, "entries-by-question"),
-            params={"question_name": question_name},
-        )
-        answerset_json = response.json()
-
-        if to_dataframe:
-            answerset_df = self.extract_answerset(answerset_json)
-            return answerset_df
-
-        return answerset_df
-
-    # check whether below is all related to the endpoint that does not work #
-    # more advanced utility
     @staticmethod
     def extract_answers(
         answer_dictionary,
@@ -682,8 +849,8 @@ class DRHWrapper:
         }
 
         def extract_question_data(question, contextual_data, parent_question_id=None):
-            question_id = question["id"]  # question id
-            question_name = question["name"]  # question name
+            question_id = question["id"]
+            question_name = question["name"]
             answer_sets = question["answer_sets"]
 
             for answer_set in answer_sets:
@@ -765,91 +932,3 @@ class DRHWrapper:
             extract_question_data(question, contextual_data)
 
         return information
-
-    # loop over rows
-    def extract_answer_information(self, df_entries):
-        """
-        Extract answer information from a DataFrame of entries.
-
-        Args:
-            df_entries (pd.DataFrame): DataFrame of entries.
-
-        Returns:
-            pd.DataFrame: DataFrame of answers.
-        """
-        information = []
-        # loop over entries (rows)
-        for _, row in df_entries.iterrows():
-            entry_id = row["entry_id"]
-            entry_name = row["entry_name"]
-            question_sets = row["categories"]
-            # loop over question sets
-            for question_set in question_sets:
-                question_set_id = question_set["id"]  # overall category
-                question_set_name = question_set["name"]  # overall category name
-                questions = question_set["questions"]
-                # perhaps the below we can do in 1 go actually...
-                if questions:
-                    answers = self.extract_answers(
-                        questions,
-                        entry_id,
-                        entry_name,
-                        question_set_id,
-                        question_set_name,
-                        question_group_id=np.nan,
-                        question_group_name=np.nan,
-                    )
-                    information.append(answers)
-                else:
-                    questions_groups = question_set["groups"]
-                    for questions_group in questions_groups:
-                        questions_group_i = questions_group["questions"]
-                        question_group_id = questions_group["id"]
-                        question_group_name = questions_group["name"]
-                        answers = self.extract_answers(
-                            questions_group_i,
-                            entry_id,
-                            entry_name,
-                            question_set_id,
-                            question_set_name,
-                            question_group_id=question_group_id,
-                            question_group_name=question_group_name,
-                        )
-                        information.append(answers)
-
-        # flatten list
-        information = [item for sublist in information for item in sublist]
-
-        # gather dataframe
-        df = pd.DataFrame(
-            information,
-            columns=[
-                "entry_id",
-                "entry_name",
-                "question_set_id",
-                "question_set_name",
-                "question_group_id",
-                "question_group_name",
-                "question_id",
-                "question_name",
-                "parent_question_id",
-                "answer_set_id",
-                "answer_set_year_from",
-                "answer_set_year_to",
-                "answer_set_region_id",
-                "answer_set_expert_id",
-                "answer_set_status_of_participants_value",
-                "answer_set_status_of_participants_name",
-                "answer_id",
-                "answer_name",
-                "answer_value",
-                "answer_text",
-                "notes",
-            ],
-        )
-
-        # fix introduction of <NA> values
-        df["parent_question_id"] = df["parent_question_id"].astype("Int64")
-        df["question_group_id"] = df["question_group_id"].astype("Int64")
-
-        return df
