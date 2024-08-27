@@ -27,12 +27,12 @@ setuptools.setup(
         "Programming Language :: Python :: 3.12",
         "Operating System :: OS Independent",
     ],
-    python_requires=">=3.8",  # also check this (has to be accurate)
+    python_requires=">=3.8",
     install_requires=[
-        "networkx>=3.3",
-        "numpy>=2.1.0",
-        "pandas>=2.2.2",
-        "requests>=2.32.3",
+        "networkx>=3.0",
+        "numpy>=1.24.0",
+        "pandas>=2.0",
+        "requests>=2.31.0",
         "tqdm",
     ],
     packages=setuptools.find_packages(),
