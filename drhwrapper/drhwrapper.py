@@ -12,6 +12,11 @@ import networkx as nx
 
 
 class DRHWrapper:
+    """
+    API access to the Database of Religious History (DRH) data.
+
+    This class provides read access to the Database of Religious History (DRH) API.
+    """
 
     def __init__(
         self,
