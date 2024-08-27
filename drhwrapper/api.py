@@ -20,7 +20,7 @@ class DRHWrapper:
 
     def __init__(
         self,
-        hostname: str,
+        hostname: str = "religiondatabase.org/public-api",
         api_key: str = "",
         ver: str = "v1",
         max_retries=10,
@@ -444,11 +444,23 @@ class DRHWrapper:
 
         # If not simplify we return as is (as DataFrame)
         questionrelation_df = pd.DataFrame(questionrelation_json)
+
         if not simplify:
-            return questionrelation_df.sort_values("id")
+            return questionrelation_df
+        return self.simplify_question_relations(questionrelation_df)
+
+    @staticmethod
+    def simplify_question_relations(questionrelation_df: pd.DataFrame) -> pd.DataFrame:
+        """Simplify the logic of related questions.
+
+        Args:
+            questionrelation_df (pd.DataFrame): questionrelation_df from .get_related_questions() method.
+
+        Returns:
+            pd.DataFrame: Dataframe with simplified related questions.
+        """
 
         # Else we simplify
-        questionrelation_df = questionrelation_df.drop(columns="id")
         questionrelation_df = questionrelation_df.rename(
             columns={
                 "first_question_id": "question_id",

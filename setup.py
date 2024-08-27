@@ -9,12 +9,12 @@ setuptools.setup(
     url="https://github.com/religionhistory/drhwrapper",
     author="Victor Møller Poulsen",
     author_email="victormoeller@gmail.com",
-    licence="Apache 2.0",
-    project_urls={
-        "https://github.com/religionhistory/drhwrapper/issues"
-        # add example documentation maybe when we know where it lives
-    },
-    classifiers={
+    license="Apache 2.0",
+    # project_urls={
+    #    "Bug Tracker": "https://github.com/religionhistory/drhwrapper/issues"
+    # add example documentation maybe when we know where it lives
+    # },
+    classifiers=[
         "Development Status :: 3 - Alpha",  # 4 - Beta
         "Intended Audience :: Science/Research",
         "License :: OSI Approved :: Apache Software License",
@@ -25,10 +25,17 @@ setuptools.setup(
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",
-    },
+        "Operating System :: OS Independent",
+    ],
     python_requires=">=3.8",  # also check this (has to be accurate)
-    install_requires=[""],  # dependencies (packages)
-    packages=setuptools.find_packages(),  # ?
+    install_requires=[
+        "networkx>=3.3",
+        "numpy>=2.1.0",
+        "pandas>=2.2.2",
+        "requests>=2.32.3",
+        "tqdm",
+    ],
+    packages=setuptools.find_packages(),
     include_package_data=True,
     keywords=["religion", "history", "api", "wrapper"],
 )

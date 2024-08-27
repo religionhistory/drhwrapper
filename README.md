@@ -4,7 +4,7 @@ Python wrapper for the [Database of Religious History (DRH)](https://religiondat
 # Install 
 To install `drhwrapper` you need a python installation on your system, running python >= 3.8. Run 
 
-```shell script
+```bash
 pip install drhwrapper
 ```
 
@@ -18,4 +18,18 @@ All functionality is mediated through an instance of drhwrapper.DRHwrapper, e.g.
 ```
 
 # Getting started 
-The best way to get started with the `drhwrapper` is to check see `demo_analysis.ipynb` and `demo_methods.ipynb`. The first walks users through an example analysis of the relationship between external violent conflict and scarification practices. The second walks users through all available endpoints provided in this package. 
+To run the demos, you will first need to install the `drhwrapper` package from PyPI. It is good practice to use a virtual environment to keep depencies tidy and separate from other projects
+
+```bash
+# create virtual environment
+python -m venv env 
+
+# activate virtual environment
+# Windows
+env\Scripts\activate
+# macOS, Linux
+source env/bin/activate
+
+# install drhwrapper
+pip install drhwrapper 
+```
