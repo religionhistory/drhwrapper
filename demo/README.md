@@ -1,6 +1,6 @@
 # Demos
 
-To run `demo_analysis.ipynb` additionally install `matplotlib`, `seaborn`, `scipy`, `geopandas`, and `shapely` into the environment that has `drhwrapper` installed.
+To run `demo_analysis.ipynb` additionally install `matplotlib`, `seaborn`, `scipy`, `geopandas`, `shapely`, and `ipykernel` into the environment that has `drhwrapper` installed.
 
 ```bash
 # if you are using a venv 

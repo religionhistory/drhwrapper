@@ -1,3 +1,6 @@
 .env
+dist
+buid.sh
+test_env
 drhenv
 drhwrapper.egg-info

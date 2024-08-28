@@ -1,5 +1,7 @@
 graft drhwrapper
 include pyproject.toml
 include setup.py 
+include README.md
+include LICENSE
 global-exclude *.py[cod]
 prune demo

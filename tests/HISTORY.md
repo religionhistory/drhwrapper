@@ -1,2 +1,3 @@
-# 0.1.0 (2024-08-28)
+# 0.1.1 (2024-08-28)
 * First release for internal testing 
+* By mistake also released 0.1.1a
